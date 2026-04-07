@@ -6,6 +6,7 @@ RUN bun install -g @anthropic-ai/claude-code
 FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS builder
 
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.1.0
 ENV UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app

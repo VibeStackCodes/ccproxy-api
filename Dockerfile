@@ -23,14 +23,14 @@ ENV UV_PYTHON_DOWNLOADS=0
 WORKDIR /app
 
 # Install git with apt cache
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
   apt-get update && apt-get install -y \
   git \
   && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,id=uv-cache,target=/root/.cache/uv \
   --mount=type=bind,source=uv.lock,target=uv.lock \
   --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
   uv sync --locked --no-install-project --no-dev
@@ -39,15 +39,15 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY . /app
 
 # Install the project
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,id=uv-cache,target=/root/.cache/uv \
   uv sync --locked --no-dev
 
 # Stage 3: Runtime
 FROM python:3.11-slim-bookworm
 
 # Install system dependencies with apt cache
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,id=apt-lib,target=/var/lib/apt,sharing=locked \
   apt-get update && apt-get install -y \
   curl wget ripgrep fd-find exa sed mawk procps\
   build-essential \
